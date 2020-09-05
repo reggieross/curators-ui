@@ -1,0 +1,74 @@
+@import 'src/assets/size';
+@import 'src/assets/colors';
+@import 'src/assets/breakPoints';
+
+.imageContainer {
+  min-height: 200px;
+  margin: 0;
+  position: relative;
+
+  .image {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background-size: cover;
+  }
+}
+
+.textContainer {
+  flex-direction: column;
+  justify-content: space-between;
+  border-top: 1px solid $white_50;
+  min-height: 200px;
+  display: flex;
+  text-align: left;
+}
+
+.root {
+  border: 1px solid $white_50;
+  display: inline-flex;
+  flex-direction: column;
+  width: 20%;
+  margin: $med $large;
+  position: relative;
+  box-sizing: border-box;
+  box-shadow: $overlay_30 5px 15px 20px;
+  border-radius: 0 0 5px 5px;
+  position: relative;
+  top: 0;
+  left: 0;
+  transition: top 0.3s ease, left 0.3s ease;
+}
+
+.root:hover {
+  cursor: pointer;
+  top: -5px;
+  left: -5px;
+}
+
+.cardFooter {
+  border-top: 1px solid $burgundy;
+  padding: $small;
+}
+
+.titleContainer {
+  padding: $small;
+  flex: 1;
+
+  h3 {
+    margin: $small 0;
+  }
+}
+
+
+@include mobile {
+  .root {
+    width: 100%;
+  }
+}
+
+@include tablet {
+  .root {
+    width: 50%;
+  }
+}

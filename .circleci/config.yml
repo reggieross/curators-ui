@@ -1,22 +1,74 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine. See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
-# Use a package of configuration called an orb.
+defaults: &defaults
+  working_directory: ~/repo
+  executor:
+    name: node/default
+
 orbs:
-  heroku: circleci/heroku@1.2.2
-  node: circleci/node@4.0.0
+  node: circleci/node@3.0.0
 
 jobs:
-  build_test:
-    docker:
-      - image: 'cimg/base:stable'
+  build:
+    <<: *defaults
     steps:
       - checkout
-      - node/install:
-          install-yarn: true
-      - run: npm run test
+      - node/install-npm
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}
+            - v1-dependencies-
+      - run: npm install
       - run: npm run build
-      
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+      - persist_to_workspace:
+          root: ~/repo
+          paths: .
+
+  unit-test:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run: npm run test
+
+  integration-test:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run: npm run test:integration
+
+  deploy:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          command: curl https://cli-assets.heroku.com/install.sh | sh
+      - run: heroku --version
+
+
+
 workflows:
-  heroku_deploy:
+  version: 2
+  build_test_deploy:
     jobs:
-      - build_test
+      - build
+      - integration-test:
+          requires:
+            - build
+      - unit-test:
+          requires:
+            - build
+      - deploy:
+          filters:
+            branches:
+              only:
+                - master
+          requires:
+            - build
+            - integration-test
+            - unit-test

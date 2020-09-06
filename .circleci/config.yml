@@ -1,0 +1,22 @@
+# Use the latest 2.1 version of CircleCI pipeline process engine. See: https://circleci.com/docs/2.0/configuration-reference
+version: 2.1
+# Use a package of configuration called an orb.
+orbs:
+  heroku: circleci/heroku@1.2.2
+  node: circleci/node@4.0.0
+
+jobs:
+  build_test:
+    docker:
+      - image: 'cimg/base:stable'
+    steps:
+      - checkout
+      - node/install:
+          install-yarn: true
+      - run: npm run test
+      - run: npm run build
+      
+workflows:
+  heroku_deploy:
+    jobs:
+      - build_test

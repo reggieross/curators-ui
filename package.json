@@ -29,6 +29,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "test:integration": "echo 'Integration tests not setup yet'",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

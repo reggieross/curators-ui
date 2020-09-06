@@ -1,0 +1,74 @@
+version: 2.1
+defaults: &defaults
+  working_directory: ~/repo
+  executor:
+    name: node/default
+
+orbs:
+  node: circleci/node@3.0.0
+
+jobs:
+  build:
+    <<: *defaults
+    steps:
+      - checkout
+      - node/install-npm
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}
+            - v1-dependencies-
+      - run: npm install
+      - run: npm run build
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+      - persist_to_workspace:
+          root: ~/repo
+          paths: .
+
+  unit-test:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run: npm run test
+
+  integration-test:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run: npm run test:integration
+
+  deploy:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          command: curl https://cli-assets.heroku.com/install.sh | sh
+      - run: heroku --version
+
+
+
+workflows:
+  version: 2
+  build_test_deploy:
+    jobs:
+      - build
+      - integration-test:
+          requires:
+            - build
+      - unit-test:
+          requires:
+            - build
+      - deploy:
+          filters:
+            branches:
+              only:
+                - master
+          requires:
+            - build
+            - integration-test
+            - unit-test

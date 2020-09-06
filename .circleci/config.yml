@@ -49,6 +49,8 @@ jobs:
       - run:
           command: curl https://cli-assets.heroku.com/install.sh | sh
       - run: heroku --version
+      - run: ./scripts/buildIt.sh
+      - run: ./scripts/sendIt.sh
 
 
 
